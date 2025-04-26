@@ -19,7 +19,7 @@ pub trait GetDataBase {
 /// 不能用0代表空指针，因为位置无关指针以偏移量存储，偏移量可能为0
 ///
 /// 低位尽可能为0，从而与可能的标记兼容
-pub static NULL_PTR: usize = 0x8000_0000_8000_0000;
+pub const NULL_PTR: usize = 0x8000_0000_8000_0000;
 
 /// 用于实现位置无关指针
 ///
