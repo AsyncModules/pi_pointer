@@ -14,7 +14,9 @@ pub trait GetDataBase {
     fn get_data_base() -> usize;
 }
 
-/// 代表空指针
+/// 无论地址转换前后，都使用此值代表空指针
+///
+/// 因此，需保证正常的指针无论在地址转换前后，其值都不会恰好等于此值。
 ///
 /// 不能用0代表空指针，因为位置无关指针以偏移量存储，偏移量可能为0
 ///
@@ -92,7 +94,13 @@ impl WrappedPtr for PIPtr {
         if self.0 as usize == NULL_PTR {
             NULL_PTR as *mut ()
         } else {
-            (self.0 as usize + call_interface!(GetDataBase::get_data_base())) as *mut ()
+            // 若在此处panic，则说明地址转换时出现了溢出
+            let ptr = (self.0 as usize)
+                .checked_add(call_interface!(GetDataBase::get_data_base()))
+                .unwrap() as *mut ();
+            // 保证正常指针的值不等于空指针
+            assert!(ptr as usize != NULL_PTR);
+            ptr
         }
     }
 
@@ -110,7 +118,13 @@ impl WrappedPtr for PIPtr {
         if ptr as usize == NULL_PTR {
             Self(NULL_PTR as *mut ())
         } else {
-            Self((ptr as usize - call_interface!(GetDataBase::get_data_base())) as *mut ())
+            // 若在此处panic，则说明地址转换时出现了溢出
+            let value = (ptr as usize)
+                .checked_sub(call_interface!(GetDataBase::get_data_base()))
+                .unwrap() as *mut ();
+            // 保证正常指针的值不等于空指针
+            assert!(value as usize != NULL_PTR);
+            Self(value)
         }
     }
 
