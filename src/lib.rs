@@ -199,17 +199,17 @@ where
 {
     /// 获取该指针变量实际存储的值
     pub fn load_value(&self) -> *mut () {
-        self.inner.load(Ordering::Acquire)
+        self.inner.load(Ordering::SeqCst)
     }
 
     /// 获取可以直接寻址的指针（可寻址的前提是指针非空）
     pub fn load_ptr(&self) -> *mut () {
-        T::from_value(self.inner.load(Ordering::Acquire)).ptr()
+        T::from_value(self.inner.load(Ordering::SeqCst)).ptr()
     }
 
     /// 获取其内部数据的拷贝
     pub fn load(&self) -> T {
-        T::from_value(self.inner.load(Ordering::Acquire))
+        T::from_value(self.inner.load(Ordering::SeqCst))
     }
 
     /// 将传入的地址数据直接存储，不经过转换，从而创建对象
@@ -240,13 +240,13 @@ where
 
     /// 将传入的地址数据直接赋值给对象，不经过转换
     pub fn store(&self, value: *mut ()) {
-        self.inner.store(value, Ordering::Release);
+        self.inner.store(value, Ordering::SeqCst);
     }
 
     /// 对该对象进行CAS操作，所有参数和返回值都不经过转换
     pub fn compare_exchange(&self, current: *mut (), new: *mut ()) -> Result<*mut (), *mut ()> {
         self.inner
-            .compare_exchange(current, new, Ordering::AcqRel, Ordering::Acquire)
+            .compare_exchange(current, new, Ordering::SeqCst, Ordering::SeqCst)
     }
 }
 
